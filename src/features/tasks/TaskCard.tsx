@@ -1,5 +1,8 @@
-import { memo } from 'react';
-import { Badge, Button, Card, Select } from '../../components/ui';
+import { ChangeEvent, memo } from 'react';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { Select } from '../../components/ui/Select';
 import { STATUSES, Task, TaskStatus } from '../../types';
 import { relativeTime } from '../../utils/taskUtils';
 
@@ -35,7 +38,9 @@ export const TaskCard = memo(function TaskCard({ task, onEdit, onStatusChange }:
           label="Status"
           value={task.status}
           options={STATUSES.map((status) => ({ value: status, label: status }))}
-          onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+            onStatusChange(task.id, event.target.value as TaskStatus)
+          }
         />
         <Button variant="secondary" size="sm" onClick={() => onEdit(task)}>
           Edit

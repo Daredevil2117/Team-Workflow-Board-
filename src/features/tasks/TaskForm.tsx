@@ -1,5 +1,7 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Button, Select, TextArea, TextInput } from '../../components/ui';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
+import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
+import { TextArea, TextInput } from '../../components/ui/TextInput';
 import { PRIORITIES, STATUSES, Task, TaskDraft, TaskPriority, TaskStatus } from '../../types';
 import { createTaskId, parseTags, taskToDraft } from '../../utils/taskUtils';
 
@@ -71,40 +73,46 @@ export function TaskForm({ task, onCancel, onSave, onDirtyChange }: TaskFormProp
         label="Title"
         value={draft.title}
         error={errors.title}
-        onChange={(event) => updateField('title', event.target.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => updateField('title', event.target.value)}
       />
       <TextArea
         label="Description"
         rows={5}
         value={draft.description}
         error={errors.description}
-        onChange={(event) => updateField('description', event.target.value)}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+          updateField('description', event.target.value)
+        }
       />
       <div className="form-grid">
         <Select
           label="Status"
           value={draft.status}
           options={STATUSES.map((status) => ({ value: status, label: status }))}
-          onChange={(event) => updateField('status', event.target.value as TaskStatus)}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+            updateField('status', event.target.value as TaskStatus)
+          }
         />
         <Select
           label="Priority"
           value={draft.priority}
           options={PRIORITIES.map((priority) => ({ value: priority, label: priority }))}
-          onChange={(event) => updateField('priority', event.target.value as TaskPriority)}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+            updateField('priority', event.target.value as TaskPriority)
+          }
         />
       </div>
       <TextInput
         label="Assignee"
         value={draft.assignee}
         error={errors.assignee}
-        onChange={(event) => updateField('assignee', event.target.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => updateField('assignee', event.target.value)}
       />
       <TextInput
         label="Tags"
         hint="Separate tags with commas."
         value={draft.tagsText}
-        onChange={(event) => updateField('tagsText', event.target.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => updateField('tagsText', event.target.value)}
       />
       <div className="task-form__actions">
         <Button type="button" variant="secondary" onClick={onCancel}>

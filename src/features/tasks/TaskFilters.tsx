@@ -1,4 +1,7 @@
-import { Button, Select, TextInput } from '../../components/ui';
+import { ChangeEvent } from 'react';
+import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
+import { TextInput } from '../../components/ui/TextInput';
 import { Filters, TaskPriority, TaskStatus } from '../../types';
 import { filterOptions } from '../../hooks/useTaskFilters';
 
@@ -22,7 +25,9 @@ export function TaskFilters({ filters, onChange }: TaskFiltersProps) {
         label="Search"
         placeholder="Search title or description"
         value={filters.search}
-        onChange={(event) => onChange({ ...filters, search: event.target.value })}
+        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+          onChange({ ...filters, search: event.target.value })
+        }
       />
       <div className="status-filter" aria-label="Status filter">
         <span>Status</span>
@@ -43,13 +48,17 @@ export function TaskFilters({ filters, onChange }: TaskFiltersProps) {
         label="Priority"
         value={filters.priority}
         options={filterOptions.priorities.map((priority) => ({ value: priority, label: priority }))}
-        onChange={(event) => onChange({ ...filters, priority: event.target.value as TaskPriority | 'All' })}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+          onChange({ ...filters, priority: event.target.value as TaskPriority | 'All' })
+        }
       />
       <Select
         label="Sort by"
         value={filters.sort}
         options={filterOptions.sorts}
-        onChange={(event) => onChange({ ...filters, sort: event.target.value as Filters['sort'] })}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+          onChange({ ...filters, sort: event.target.value as Filters['sort'] })
+        }
       />
       <Button
         type="button"
