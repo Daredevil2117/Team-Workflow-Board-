@@ -87,6 +87,3 @@ Current coverage includes:
 - There is no delete flow yet.
 - Relative timestamps are implemented locally instead of with a date library.
 
-## AI Assistance Disclosure
-
-AI assistance was used to generate the first-pass structure, component implementations, tests, and documentation. I reviewed and adjusted the output to fit the assignment constraints, added TypeScript types, fixed build/test issues, and kept the UI components custom rather than using a full UI kit.
