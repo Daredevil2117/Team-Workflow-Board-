@@ -1,70 +1,92 @@
 # Team Workflow Board
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A small React + TypeScript workflow board for managing team tasks across Backlog, In Progress, and Done. It includes a reusable local component library, URL-backed filters, localStorage persistence, validation, dirty-state warnings, and tests.
 
-## Available Scripts
+## Run the Project
 
-In the project directory, you can run:
+```bash
+npm install
+npm start
+```
 
-### `npm start`
+Open `http://localhost:3000`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Run verification:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm test -- --watchAll=false --runInBand
+npm run build
+```
 
-### `npm test`
+`--runInBand` avoids Jest worker spawning issues seen in this Windows sandbox.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Architecture Overview
 
-### `npm run build`
+Source is organized by shared UI, feature code, hooks, and utilities:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```text
+src/
+  components/ui/      reusable Button, inputs, Select, Badge, Card, Modal, Toast
+  features/tasks/     board, task cards, filters, and task form
+  hooks/              localStorage persistence and URL filter state
+  utils/              task filtering, sorting, tags, relative time helpers
+  types.ts            domain types and shared constants
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Component hierarchy:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```text
+App
+  TaskFilters
+    TextInput, Select, Button
+  TaskBoard
+    TaskCard
+      Card, Badge, Select, Button
+  Modal
+    TaskForm
+      TextInput, TextArea, Select, Button
+  Toast / Alert
+```
 
-### `npm run eject`
+State is kept in React because the app has a small local data model. `useTaskStorage` owns task persistence and exposes focused mutations. `useTaskFilters` owns query-string parsing/writing so filters are shareable and restored on refresh. Derived task lists are calculated with `useMemo` in `App`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The UI components are intentionally small and composable. Inputs own label/error wiring, Modal owns focus entry, Escape handling, and a simple focus trap, and feature components provide task-specific behavior.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Storage Versioning and Migration
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Tasks are stored under `team-workflow-board` as:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```json
+{
+  "schemaVersion": 2,
+  "tasks": []
+}
+```
 
-## Learn More
+The migration path simulates upgrading from schema version 1, where tasks only had a minimal shape. When `useTaskStorage` detects version 1, it fills the new fields (`priority`, `assignee`, `tags`, `createdAt`, `updatedAt`), writes version 2 back to localStorage, and shows a non-intrusive toast.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+If localStorage cannot be read or written, the app falls back to starter tasks and shows an alert that changes may not persist.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Refactor and Performance Note
 
-### Code Splitting
+During implementation, task filtering and sorting started inside the board rendering path. I moved that logic into `filterAndSortTasks` and memoized the derived list in `App`, which keeps rendering predictable and easy to test.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+I also wrapped `TaskCard` in `React.memo`. That keeps cards from rerendering when unrelated app state changes, such as opening the create modal or changing the dirty flag. In a larger board, the next step would be list virtualization or column-level memoization.
 
-### Analyzing the Bundle Size
+## Tests
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Current coverage includes:
 
-### Making a Progressive Web App
+- Creating a task through the modal and seeing it on the board.
+- Restoring filters from the URL and updating the URL when search changes.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Known Limitations
 
-### Advanced Configuration
+- Task movement uses a status dropdown instead of drag-and-drop. This keeps the dependency surface small and remains keyboard-accessible.
+- The app uses localStorage only, so data is browser/device scoped.
+- There is no delete flow yet.
+- Relative timestamps are implemented locally instead of with a date library.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## AI Assistance Disclosure
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+AI assistance was used to generate the first-pass structure, component implementations, tests, and documentation. I reviewed and adjusted the output to fit the assignment constraints, added TypeScript types, fixed build/test issues, and kept the UI components custom rather than using a full UI kit.
